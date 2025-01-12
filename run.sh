@@ -5,6 +5,7 @@
 # Input args
 profile=$1 
 outDir=$2
+projectID=$3
 
 # housekeeping
 if [[ -z $outDir || -z $profile || -z $projectID ]]; then echo "All variables are required: profile outDir projectID"; exit; fi
