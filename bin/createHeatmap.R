@@ -53,6 +53,17 @@ annoData=read.csv(annoInput,row.names=1)
 geneFunctions=read.csv(geneInput,row.names=1)
 
 ################################################
+## Encode Gene Functions for Annotation      ##
+################################################
+
+# Convert gene functions to a factor for annotation purposes
+geneFunctions$gene_functions <- as.factor(geneFunctions$gene_functions)
+
+# Prepare annotation data for the heatmap (gene functions)
+geneFunctions_anno <- geneFunctions[, "gene_functions", drop = FALSE]
+colnames(geneFunctions_anno) <- "Gene Functions"
+
+################################################
 ################################################
 ## Set colors##
 ################################################
@@ -69,14 +80,45 @@ annoColors <- list(
 )
 
 ################################################
-################################################
-## Create a basic heatmap##
-################################################
+## Create a basic heatmap                     ##
 ################################################
 
+# Ensure only numeric data from sampleData is used for the heatmap (exclude row names)
+numericData <- as.matrix(sampleData)  # Convert data to numeric matrix
+
+# Basic Heatmap using numeric data from sampleData
+basic_heatmap <- pheatmap(
+  numericData, 
+  cluster_rows = TRUE, 
+  cluster_cols = TRUE, 
+  scale = "row", 
+  clustering_distance_rows = "euclidean", 
+  clustering_distance_cols = "euclidean", 
+  clustering_method = "ward.D", 
+  show_rownames = TRUE, 
+  show_colnames = TRUE,
+  filename = paste0("basic_heatmap_", outprefix, ".pdf")
+)
 
 ################################################
+## Create a complex heatmap                   ##
 ################################################
-## Create a basic heatmap##
-################################################
-################################################
+
+# Complex Heatmap using numeric data from sampleData and annotations from geneFunctions_anno
+complex_heatmap <- pheatmap(
+  numericData, 
+  cluster_rows = TRUE, 
+  cluster_cols = TRUE, 
+  scale = "row", 
+  clustering_distance_rows = "euclidean", 
+  clustering_distance_cols = "euclidean", 
+  clustering_method = "ward.D", 
+  annotation_row = geneFunctions_anno,  # Annotate rows (genes) based on gene functions
+  annotation_col = annoData,  # Use column annotations from the provided annotation data
+  annotation_colors = annoColors,  # Use predefined annotation colors
+  show_rownames = FALSE, 
+  show_colnames = FALSE, 
+  legend_breaks = c(min(numericData), median(numericData), max(numericData)),  # Break scale into three bins
+  legend_labels = c("low", "medium", "high"), 
+  filename = paste0("complex_heatmap_", outprefix, ".pdf")
+)
